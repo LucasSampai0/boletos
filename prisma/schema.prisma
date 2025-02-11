@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model admin {
+  id      Int    @id @default(autoincrement())
+  picture String @db.VarChar(255)
+  nome    String @db.VarChar(255)
+  email   String @db.VarChar(255)
+  senha   String @db.VarChar(255)
+}
+
+model inquilinos {
+  id       Int     @id @default(autoincrement())
+  nome     String  @db.VarChar(255)
+  cpf      String  @db.VarChar(255)
+  senha    String? @db.VarChar(255)
+  endereco String  @db.VarChar(255)
+  numero   String  @db.VarChar(255)
+  cidade   String  @db.VarChar(255)
+  estado   String  @db.VarChar(255)
+  cep      String  @db.VarChar(255)
+  email    String  @db.VarChar(255)
+
+  contratos contratos[]
+  boletos   boletos[]
+}
+
+model boletos {
+  id               Int      @id
+  dataVencimento   DateTime @db.Date
+  dataEmissao      DateTime @db.Date
+  valor            Float    @db.Float
+  nossoNumero      String   @db.VarChar(255)
+  agencia          String   @db.VarChar(255)
+  dvAgencia        String   @db.VarChar(255)
+  carteira         String   @db.VarChar(255)
+  conta            String   @db.VarChar(255)
+  dvConta          String   @db.VarChar(255)
+  aceite           String   @db.VarChar(255)
+  especieDocumento String   @db.VarChar(255)
+  numeroDocumento  String   @db.VarChar(255)
+  instrucoes       String   @db.Text
+  status           Status   @default(ATIVO) // 0 - ATIVO, 1 - PAGO, 2 - CANCELADO
+  dataPagamento    DateTime? @db.Date @default(dbgenerated("(NULL)"))
+  dataCriacao      DateTime @db.Date
+  dataAtualizacao  DateTime @db.Date
+
+  contrato    contratos  @relation(fields: [idContrato], references: [id])
+  idContrato  Int
+  inquilino   inquilinos @relation(fields: [idInquilino], references: [id])
+  idInquilino Int
+}
+
+enum Status {
+  ATIVO
+  PAGO
+  CANCELADO
+}
+
+model contratos {
+  id          Int    @id @default(autoincrement())
+  titulo      String @db.VarChar(255)
+  numero      String @db.VarChar(255)
+  endereco    String @db.VarChar(255)
+  cidade      String @db.VarChar(255)
+  estado      String @db.VarChar(255)
+  cep         String @db.VarChar(255)
+  observacoes String @db.Text
+
+  inquilino   inquilinos @relation(fields: [idInquilino], references: [id])
+  idInquilino Int
+
+  laudos  laudos[]
+  boletos boletos[]
+}
+
+model laudos {
+  id Int @id @default(autoincrement())
+
+  contrato   contratos @relation(fields: [idContrato], references: [id])
+  idContrato Int
+}
+
+model imobiliaria {
+  id          Int    @id @default(autoincrement())
+  razaoSocial String @db.VarChar(255)
+  cnpj        String @db.VarChar(255)
+  endereco    String @db.VarChar(255)
+  cidade      String @db.VarChar(255)
+  estado      String @db.VarChar(255)
+  cep         String @db.VarChar(255)
+  email       String @db.VarChar(255)
+}
+
+model forms {
+  id              Int      @id @default(autoincrement())
+  nomeInquilino   String   @db.VarChar(255)
+  emailInquilino  String   @db.VarChar(255)
+  telefone        String   @db.VarChar(255)
+  descricao       String   @db.Text
+  dataCriacao     DateTime @db.DateTime
+  dataAtualizacao DateTime @db.DateTime
+  dados           Json     @db.Json
+}
